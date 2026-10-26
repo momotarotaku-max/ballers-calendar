@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>BALLER'S GIFU SALES</title>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="GIFU SALES">
+<meta name="theme-color" content="#f8f7f1">
+<link rel="apple-touch-icon" sizes="180x180" href="icons/gifu-sales-180.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icons/gifu-sales-192.png">
+<link rel="icon" type="image/png" sizes="32x32" href="icons/gifu-sales-32.png">
+<style>
+  :root{color-scheme:light}
+  html,body{margin:0;height:100%;background:#f8f7f1;font-family:-apple-system,"Hiragino Sans","Yu Gothic",system-ui,sans-serif;color:#2a281d}
+  #app{position:fixed;inset:0;width:100%;height:100%;border:0;display:block;background:#f8f7f1}
+  .setup{max-width:520px;margin:0 auto;padding:max(28px,env(safe-area-inset-top)) max(20px,env(safe-area-inset-right)) 40px max(20px,env(safe-area-inset-left));display:flex;flex-direction:column;gap:16px}
+  .setup img{width:96px;height:96px;border-radius:22px;box-shadow:0 6px 20px rgba(0,0,0,.12)}
+  h1{margin:0;font-size:22px}
+  p{margin:0;line-height:1.6;font-size:15px}
+  ol{margin:0;padding-left:1.3em;line-height:1.7;font-size:15px}
+  input{font:inherit;font-size:16px;padding:12px;border:1px solid #e6e2d0;border-radius:10px;width:100%;box-sizing:border-box;background:#fff;color:#2a281d}
+  button{font:inherit;font-size:16px;font-weight:700;padding:13px;border:0;border-radius:10px;background:#7d7444;color:#fff;cursor:pointer}
+  .out{display:none;flex-direction:column;gap:10px;padding:14px;border-radius:12px;background:#fff;border:1px solid #e6e2d0}
+  .out a{word-break:break-all;color:#7d7444;font-size:14px}
+  .err{color:#c8322b;font-size:14px;display:none}
+</style>
+</head>
+<body>
+<div class="setup" id="setup" hidden>
+  <img src="icons/gifu-sales-180.png" alt="">
+  <h1>BALLER'S GIFU SALES</h1>
+  <p>Apps Script の「ウェブアプリのURL」（…/exec で終わるもの）を貼ると、ホーム画面に追加する用のリンクができます。</p>
+  <input id="url" placeholder="https://script.google.com/macros/s/…/exec" autocomplete="off" autocapitalize="off" spellcheck="false">
+  <button id="make" type="button">リンクを作る</button>
+  <div class="err" id="err">URLが読み取れませんでした。…/exec で終わるURLを貼ってください。</div>
+  <div class="out" id="out">
+    <p><b>このリンクをLINEで共有してください</b></p>
+    <a id="link" href="#" target="_self"></a>
+    <button id="copy" type="button">リンクをコピー</button>
+    <ol>
+      <li>iPhoneのSafariでこのリンクを開く</li>
+      <li>下の共有ボタン（四角から矢印）→「ホーム画面に追加」</li>
+      <li>名前を確認して「追加」</li>
+    </ol>
+  </div>
+</div>
+<script>
+(function(){
+  var id=new URLSearchParams(location.search).get('id')||'';
+  if(/^[A-Za-z0-9_-]{20,}$/.test(id)){
+    var f=document.createElement('iframe');
+    f.id='app';f.title=document.title;
+    f.src='https://script.google.com/macros/s/'+id+'/exec';
+    f.setAttribute('allow','clipboard-write');
+    document.body.appendChild(f);
+    return;
+  }
+  var s=document.getElementById('setup');s.hidden=false;
+  var base=location.origin+location.pathname;
+  document.getElementById('make').onclick=function(){
+    var m=String(document.getElementById('url').value).match(/\/s\/([A-Za-z0-9_-]{20,})\/(exec|dev)/);
+    document.getElementById('err').style.display=m?'none':'block';
+    if(!m){document.getElementById('out').style.display='none';return}
+    var link=base+'?id='+m[1];
+    var a=document.getElementById('link');a.textContent=link;a.href=link;
+    document.getElementById('out').style.display='flex';
+  };
+  document.getElementById('copy').onclick=function(){
+    var t=document.getElementById('link').textContent,b=this;
+    (navigator.clipboard?navigator.clipboard.writeText(t):Promise.reject()).then(function(){b.textContent='コピーしました'},function(){
+      var r=document.createRange();r.selectNodeContents(document.getElementById('link'));var sel=getSelection();sel.removeAllRanges();sel.addRange(r);b.textContent='選択したのでコピーしてください'});
+  };
+})();
+</script>
+</body>
+</html>
